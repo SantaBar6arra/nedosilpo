@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cqrs-Es\Cqrs.Core\Cqrs.Core.csproj" />
+    <ProjectReference Include="..\..\NedoSilpo.Common\NedoSilpo.Common.csproj" />
+    <ProjectReference Include="..\NedoSilpo.Query.Domain\NedoSilpo.Query.Domain.csproj" />
+    <ProjectReference Include="..\NedoSilpo.Query.Infrastructure\NedoSilpo.Query.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

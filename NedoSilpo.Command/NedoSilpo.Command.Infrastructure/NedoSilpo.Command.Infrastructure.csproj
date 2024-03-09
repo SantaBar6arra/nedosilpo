@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Cqrs-Es\Cqrs.Core\Cqrs.Core.csproj" />
+    <ProjectReference Include="..\NedoSilpo.Command.Domain\NedoSilpo.Command.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Confluent.Kafka" Version="2.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.24.0" />
+  </ItemGroup>
+    
+</Project>
