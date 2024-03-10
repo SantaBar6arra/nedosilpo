@@ -1,4 +1,3 @@
-using System.Text;
 using Cqrs.Core.Domain;
 using Cqrs.Core.Events;
 using Microsoft.Extensions.Options;
@@ -7,13 +6,14 @@ using NedoSilpo.Command.Infrastructure.Config;
 
 namespace NedoSilpo.Command.Infrastructure.Repositories;
 
+// todo this event store repository is not generic as it is tightly bound to ProductAggregate
 public class EventStoreRepository : IEventStoreRepository
 {
     private readonly IMongoCollection<EventModel> _eventStoreCollection;
 
+    // consider registering MongoDbConfig as a singleton service itself and pass it as a parameter
     public EventStoreRepository(IOptions<MongoDbConfig> config)
     {
-        // todo redo when doing a real work
         var (connectionString, databaseName, collection) = config.Value;
 
         var client = new MongoClient(connectionString);

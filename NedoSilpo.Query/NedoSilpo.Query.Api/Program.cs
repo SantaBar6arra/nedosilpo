@@ -1,11 +1,29 @@
+using Confluent.Kafka;
+using Cqrs.Core.Consumers;
+using Microsoft.EntityFrameworkCore;
+using NedoSilpo.Common.Handlers;
 using NedoSilpo.Query.Api;
+using NedoSilpo.Query.Domain.Repositories;
+using NedoSilpo.Query.Infrastructure.Consumers;
+using NedoSilpo.Query.Infrastructure.Context;
+using NedoSilpo.Query.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.Configure<ConsumerConfig>(builder.Configuration.GetSection(nameof(ConsumerConfig)));
+builder.Services.AddDbContext<DataContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+builder.Services.AddScoped<IEventHandler, NedoSilpo.Query.Infrastructure.Handlers.EventHandler>();
+builder.Services.AddScoped<IEventConsumer, EventConsumer>();
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddHostedService<ConsumerHostedService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var dataContext = builder.Services.BuildServiceProvider().GetRequiredService<DataContext>();
+dataContext.Database.EnsureCreated();
 
 var app = builder.Build();
 

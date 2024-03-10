@@ -1,12 +1,15 @@
+using Confluent.Kafka;
 using Cqrs.Core.Domain;
 using Cqrs.Core.Handlers;
 using Cqrs.Core.Infrastructure;
+using Cqrs.Core.Producers;
 using NedoSilpo.Command.Api;
 using NedoSilpo.Command.Api.Commands;
 using NedoSilpo.Command.Domain.Aggregates;
 using NedoSilpo.Command.Infrastructure.Config;
 using NedoSilpo.Command.Infrastructure.Dispatchers;
 using NedoSilpo.Command.Infrastructure.Handlers;
+using NedoSilpo.Command.Infrastructure.Producers;
 using NedoSilpo.Command.Infrastructure.Repositories;
 using NedoSilpo.Command.Infrastructure.Stores;
 
@@ -15,7 +18,9 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.Configure<MongoDbConfig>(builder.Configuration.GetSection(nameof(MongoDbConfig)));
+builder.Services.Configure<ProducerConfig>(builder.Configuration.GetSection(nameof(ProducerConfig)));
 builder.Services.AddScoped<IEventStoreRepository, EventStoreRepository>();
+builder.Services.AddScoped<IEventProducer, EventProducer>();
 builder.Services.AddScoped<IEventStore, EventStore>();
 builder.Services.AddScoped<IEventSourcingHandler<ProductAggregate>, EventSourcingHandler>();
 builder.Services.AddScoped<ICommandHandler, CommandHandler>();

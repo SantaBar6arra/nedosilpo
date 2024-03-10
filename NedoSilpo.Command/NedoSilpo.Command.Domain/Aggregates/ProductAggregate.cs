@@ -1,5 +1,5 @@
 using Cqrs.Core.Domain;
-using NedoSilpo.Command.Domain.Events;
+using NedoSilpo.Common.Events;
 
 namespace NedoSilpo.Command.Domain.Aggregates;
 
@@ -18,9 +18,9 @@ public class ProductAggregate : AggregateRoot
 
     }
 
-    public ProductAggregate(Guid id, string name, string description, decimal price, int quantityAvailable) // todo consider removing id
+    public ProductAggregate(string name, string description, decimal price, int quantityAvailable)
     {
-        RaiseEvent(new ProductCreated(name, description, price, quantityAvailable) { Id = id }); // but use Guid.NewGuid() instead
+        RaiseEvent(new ProductCreated(Id, name, description, price, quantityAvailable));
     }
 
     public void Update(string name, string description, decimal price, int quantityAvailable)
@@ -28,7 +28,7 @@ public class ProductAggregate : AggregateRoot
         if (_isDeleted)
             throw new InvalidOperationException("Product is deleted!");
 
-        RaiseEvent(new ProductUpdated(name, description, price, quantityAvailable)); // todo consider passing id (why?)
+        RaiseEvent(new ProductUpdated(Id, name, description, price, quantityAvailable));
     }
 
     public void Sell(int quantity)
@@ -39,7 +39,7 @@ public class ProductAggregate : AggregateRoot
         if (_quantityAvailable < quantity)
             throw new InvalidOperationException("Not enough quantity available!");
 
-        RaiseEvent(new ProductSold(quantity));
+        RaiseEvent(new ProductSold(Id, quantity));
     }
 
     public void Remove()
@@ -47,7 +47,7 @@ public class ProductAggregate : AggregateRoot
         if (_isDeleted)
             throw new InvalidOperationException("Product is deleted!");
 
-        RaiseEvent(new ProductRemoved(_id));
+        RaiseEvent(new ProductRemoved(Id));
     }
 
     #endregion
@@ -56,7 +56,7 @@ public class ProductAggregate : AggregateRoot
 
     private void Apply(ProductCreated @event)
     {
-        _id = @event.Id;
+        Id = @event.Id;
         _isDeleted = false;
         _name = @event.Name;
         _description = @event.Description;
@@ -66,6 +66,7 @@ public class ProductAggregate : AggregateRoot
 
     private void Apply(ProductUpdated @event)
     {
+        Id = @event.Id; // Not necessary, but for the sake of consistency
         _name = @event.Name;
         _description = @event.Description;
         _price = @event.Price;
@@ -74,11 +75,13 @@ public class ProductAggregate : AggregateRoot
 
     private void Apply(ProductSold @event)
     {
+        Id = @event.Id;
         _quantityAvailable -= @event.Quantity;
     }
 
-    private void Apply(ProductRemoved _)
+    private void Apply(ProductRemoved @event)
     {
+        Id = @event.Id;
         _isDeleted = true;
     }
 
