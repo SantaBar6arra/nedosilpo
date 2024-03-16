@@ -32,8 +32,8 @@ public class CommandHandler : ICommandHandler
         var product = await _eventSourcingHandler.GetByIdAsync(command.Id);
         product.Sell(command.Quantity);
         await _eventSourcingHandler.SaveAsync(product);
-    }
 
+    }
     public async Task HandleAsync(RemoveProduct command)
     {
         var product = await _eventSourcingHandler.GetByIdAsync(command.Id);

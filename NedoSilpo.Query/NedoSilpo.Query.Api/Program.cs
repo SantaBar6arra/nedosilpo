@@ -15,9 +15,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<ConsumerConfig>(builder.Configuration.GetSection(nameof(ConsumerConfig)));
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
+builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IEventHandler, NedoSilpo.Query.Infrastructure.Handlers.EventHandler>();
 builder.Services.AddScoped<IEventConsumer, EventConsumer>();
-builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddHostedService<ConsumerHostedService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -1,8 +1,10 @@
 using Confluent.Kafka;
 using Cqrs.Core.Domain;
+using Cqrs.Core.Events;
 using Cqrs.Core.Handlers;
 using Cqrs.Core.Infrastructure;
 using Cqrs.Core.Producers;
+using MongoDB.Bson.Serialization;
 using NedoSilpo.Command.Api;
 using NedoSilpo.Command.Api.Commands;
 using NedoSilpo.Command.Domain.Aggregates;
@@ -12,8 +14,16 @@ using NedoSilpo.Command.Infrastructure.Handlers;
 using NedoSilpo.Command.Infrastructure.Producers;
 using NedoSilpo.Command.Infrastructure.Repositories;
 using NedoSilpo.Command.Infrastructure.Stores;
+using NedoSilpo.Common.Events;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// todo replace this obvious shit
+BsonClassMap.RegisterClassMap<BaseEvent>();
+BsonClassMap.RegisterClassMap<ProductCreated>();
+BsonClassMap.RegisterClassMap<ProductUpdated>();
+BsonClassMap.RegisterClassMap<ProductSold>();
+BsonClassMap.RegisterClassMap<ProductRemoved>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -34,6 +44,7 @@ dispatcher.Register<SellProduct>(commandHandler.HandleAsync);
 dispatcher.Register<RemoveProduct>(commandHandler.HandleAsync);
 builder.Services.AddSingleton<ICommandDispatcher>(_ => dispatcher);
 
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -46,6 +57,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapControllers();
 app.UseHttpsRedirection();
 
 var summaries = new[]

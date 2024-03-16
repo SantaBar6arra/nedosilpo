@@ -20,16 +20,15 @@ public class EventConsumer : IEventConsumer
         _eventHandler = eventHandler;
     }
 
-    public void Consume(string topic)
+    public async Task Consume(string topic)
     {
         using var consumer = new ConsumerBuilder<string, string>(_config)
             .SetKeyDeserializer(Deserializers.Utf8)
-            .SetKeyDeserializer(Deserializers.Utf8)
+            .SetValueDeserializer(Deserializers.Utf8)
             .Build();
 
         var options = new JsonSerializerOptions { Converters = { new EventJsonConverter() } };
         consumer.Subscribe(topic);
-
 
         while (true)
         {
@@ -42,7 +41,8 @@ public class EventConsumer : IEventConsumer
             var handlerMethod = _eventHandler.GetType().GetMethod("On", [@event?.GetType()])
                 ?? throw new InvalidOperationException("no 'On' method found for event type");
 
-            handlerMethod.Invoke(_eventHandler, [@event]);
+            await (Task)handlerMethod.Invoke(_eventHandler, [@event]);
+
             consumer.Commit(consumeResult);
         }
     }

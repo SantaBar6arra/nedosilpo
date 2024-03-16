@@ -1,14 +1,14 @@
-using Cqrs.Core.Messages;
-
 namespace Cqrs.Core.Events;
 
-public record BaseEvent : Message
+public abstract record BaseEvent
 {
-    protected BaseEvent(string type)
-    {
-        Type = type;
-    }
-
+    public Guid Id { get; set; }
     public string Type { get; set; }
     public int Version { get; set; }
+
+    protected BaseEvent(Guid id, string type)
+    {
+        Id = id;
+        Type = type;
+    }
 }

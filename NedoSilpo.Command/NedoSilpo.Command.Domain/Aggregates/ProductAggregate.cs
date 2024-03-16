@@ -20,7 +20,7 @@ public class ProductAggregate : AggregateRoot
 
     public ProductAggregate(string name, string description, decimal price, int quantityAvailable)
     {
-        RaiseEvent(new ProductCreated(Id, name, description, price, quantityAvailable));
+        RaiseEvent(new ProductCreated(Guid.NewGuid(), name, description, price, quantityAvailable));
     }
 
     public void Update(string name, string description, decimal price, int quantityAvailable)
@@ -56,7 +56,7 @@ public class ProductAggregate : AggregateRoot
 
     private void Apply(ProductCreated @event)
     {
-        Id = @event.Id;
+        _id = @event.Id;
         _isDeleted = false;
         _name = @event.Name;
         _description = @event.Description;
@@ -66,7 +66,7 @@ public class ProductAggregate : AggregateRoot
 
     private void Apply(ProductUpdated @event)
     {
-        Id = @event.Id; // Not necessary, but for the sake of consistency
+        _id = @event.Id; // Not necessary, but for the sake of consistency
         _name = @event.Name;
         _description = @event.Description;
         _price = @event.Price;
@@ -75,13 +75,13 @@ public class ProductAggregate : AggregateRoot
 
     private void Apply(ProductSold @event)
     {
-        Id = @event.Id;
+        _id = @event.Id;
         _quantityAvailable -= @event.Quantity;
     }
 
     private void Apply(ProductRemoved @event)
     {
-        Id = @event.Id;
+        _id = @event.Id;
         _isDeleted = true;
     }
 

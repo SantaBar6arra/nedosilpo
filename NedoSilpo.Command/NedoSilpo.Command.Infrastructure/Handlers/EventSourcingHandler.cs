@@ -15,7 +15,7 @@ public class EventSourcingHandler : IEventSourcingHandler<ProductAggregate> // t
     public async Task<ProductAggregate> GetByIdAsync(Guid aggregateId)
     {
         var aggregate = new ProductAggregate();
-        var events = await _eventStore.GetEventsAsync(aggregateId);
+        var events = await _eventStore.GetEventsAsync(aggregateId, typeof(ProductAggregate));
 
         if (events is null or { Count: 0 })
             return aggregate;
@@ -28,7 +28,7 @@ public class EventSourcingHandler : IEventSourcingHandler<ProductAggregate> // t
 
     public async Task SaveAsync(AggregateRoot aggregate)
     {
-        await _eventStore.SaveEventsAsync(aggregate.Id, aggregate.GetUncommittedChanges(), aggregate.Version);
+        await _eventStore.SaveEventsAsync(aggregate, aggregate.GetUncommittedChanges(), aggregate.Version);
         aggregate.MarkChangesAsCommitted();
     }
 }

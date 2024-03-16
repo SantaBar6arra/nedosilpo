@@ -1,12 +1,14 @@
+using System.Reflection;
 using Cqrs.Core.Events;
 
 namespace Cqrs.Core.Domain;
 
 public abstract class AggregateRoot
 {
+    protected Guid _id;
     private readonly IList<BaseEvent> _changes = [];
 
-    public Guid Id { get; protected set; } = Guid.NewGuid();
+    public Guid Id => _id;
     public int Version { get; set; } = -1;
 
 
@@ -15,18 +17,18 @@ public abstract class AggregateRoot
     protected void RaiseEvent(BaseEvent ev) => ApplyChange(ev, true);
     public void ReplayEvents(IList<BaseEvent> events)
     {
-        foreach (var evt in events)
-            ApplyChange(evt, false);
+        foreach (var @event in events)
+            ApplyChange(@event, false);
     }
 
-    private void ApplyChange(BaseEvent evt, bool isNew)
+    private void ApplyChange(BaseEvent @event, bool isNew)
     {
-        var method = GetType().GetMethod("Apply", [evt.GetType()])
+        var method = GetType().GetMethod("Apply", BindingFlags.Instance | BindingFlags.NonPublic, [@event.GetType()])
             ?? throw new InvalidOperationException("no 'Apply' method found on aggregate");
 
-        method.Invoke(this, [evt.GetType()]);
+        method.Invoke(this, [@event]);
 
         if (isNew)
-            _changes.Add(evt);
+            _changes.Add(@event);
     }
 }

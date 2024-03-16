@@ -3,7 +3,7 @@ using Cqrs.Core.Events;
 using Cqrs.Core.Exceptions;
 using Cqrs.Core.Infrastructure;
 using Cqrs.Core.Producers;
-using NedoSilpo.Command.Domain.Aggregates;
+
 // ReSharper disable once ConvertToPrimaryConstructor
 
 namespace NedoSilpo.Command.Infrastructure.Stores;
@@ -19,22 +19,23 @@ public class EventStore : IEventStore
         _eventProducer = eventProducer;
     }
 
-    public async Task<IList<BaseEvent>> GetEventsAsync(Guid aggregateId)
+    public async Task<IList<BaseEvent>> GetEventsAsync(Guid aggregateId, Type aggregateType)
     {
-        var eventStream = await _eventStoreRepository.FindByAggregateId(aggregateId);
+        var eventStream = await _eventStoreRepository.FindEvents(aggregateId, aggregateType);
 
         if (eventStream is null or { Count: 0 })
             throw new AggregateNotFoundException($"incorrect {nameof(aggregateId)} provided!");
 
         return eventStream
-            .OrderBy(evt => evt.Version)
-            .Select(evt => evt.EventData)
+            .OrderBy(@event => @event.Version)
+            .Select(@event => @event.EventData)
             .ToList();
     }
 
-    public async Task SaveEventsAsync(Guid aggregateId, IEnumerable<BaseEvent> events, int expectedVersion)
+    public async Task SaveEventsAsync(AggregateRoot aggregate, IEnumerable<BaseEvent> events, int expectedVersion)
     {
-        var eventStream = await _eventStoreRepository.FindByAggregateId(aggregateId);
+        var aggregateType = aggregate.GetType();
+        var eventStream = await _eventStoreRepository.FindEvents(aggregate.Id, aggregateType);
 
         if (expectedVersion is not -1 && eventStream[^1].Version != expectedVersion)
             throw new ConcurrencyException();
@@ -45,16 +46,15 @@ public class EventStore : IEventStore
         {
             version++;
             @event.Version = version;
-            var eventType = @event.GetType().Name;
 
             var eventModel = new EventModel
             {
                 TimeStamp = DateTime.Now,
                 Version = version,
-                EventType = eventType,
                 EventData = @event,
-                AggregateId = aggregateId,
-                AggregateType = nameof(ProductAggregate) // todo: ??? fix it, its an obvious fail
+                EventType = @event.GetType().Name,
+                AggregateId = aggregate.Id,
+                AggregateType = aggregate.GetType().Name
             };
 
             await _eventStoreRepository.SaveAsync(eventModel);
