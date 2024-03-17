@@ -1,8 +1,9 @@
+using System.Reflection;
 using Confluent.Kafka;
 using Cqrs.Core.Consumers;
 using Microsoft.EntityFrameworkCore;
-using NedoSilpo.Common.Handlers;
 using NedoSilpo.Query.Api;
+using NedoSilpo.Query.Api.Extensions;
 using NedoSilpo.Query.Domain.Repositories;
 using NedoSilpo.Query.Infrastructure.Consumers;
 using NedoSilpo.Query.Infrastructure.Context;
@@ -16,7 +17,7 @@ builder.Services.Configure<ConsumerConfig>(builder.Configuration.GetSection(name
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
-builder.Services.AddScoped<IEventHandler, NedoSilpo.Query.Infrastructure.Handlers.EventHandler>();
+builder.Services.RegisterEventHandlers(Assembly.GetAssembly(typeof(ConsumerHostedService))!); // todo find better way
 builder.Services.AddScoped<IEventConsumer, EventConsumer>();
 builder.Services.AddHostedService<ConsumerHostedService>();
 builder.Services.AddEndpointsApiExplorer();

@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json;
 using Confluent.Kafka;
 using Cqrs.Core.Consumers;
@@ -12,12 +13,12 @@ namespace NedoSilpo.Query.Infrastructure.Consumers;
 public class EventConsumer : IEventConsumer
 {
     private readonly ConsumerConfig _config;
-    private readonly IEventHandler _eventHandler;
+    private readonly IList<IEventHandler> _eventHandlers;
 
-    public EventConsumer(IOptions<ConsumerConfig> config, IEventHandler eventHandler)
+    public EventConsumer(IOptions<ConsumerConfig> config, IEnumerable<IEventHandler> eventHandlers)
     {
         _config = config.Value;
-        _eventHandler = eventHandler;
+        _eventHandlers = eventHandlers.ToList();
     }
 
     public async Task Consume(string topic)
@@ -36,14 +37,26 @@ public class EventConsumer : IEventConsumer
             if (consumeResult.Message is null)
                 continue;
 
-            var @event = JsonSerializer.Deserialize<BaseEvent>(consumeResult.Message.Value, options);
+            var @event = JsonSerializer.Deserialize<BaseEvent>(consumeResult.Message.Value, options)
+                ?? throw new InvalidOperationException("could not deserialize event message!");
 
-            var handlerMethod = _eventHandler.GetType().GetMethod("On", [@event?.GetType()])
-                ?? throw new InvalidOperationException("no 'On' method found for event type");
-
-            await (Task)handlerMethod.Invoke(_eventHandler, [@event]);
+            await HandleEvent(@event);
 
             consumer.Commit(consumeResult);
         }
+    }
+
+    private async Task HandleEvent(BaseEvent @event)
+    {
+        var handlers = _eventHandlers
+            .Select(handler => (handler, handler.GetType().GetMethod("On", [@event.GetType()])))
+            .OfType<(IEventHandler, MethodInfo)>()
+            .ToArray();
+
+        if (handlers.Length is 0)
+            throw new InvalidOperationException("no 'On' method found for event type");
+
+        foreach (var (handler, on) in handlers)
+            await (Task)on.Invoke(handler, [@event]);
     }
 }

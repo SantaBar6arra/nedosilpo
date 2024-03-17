@@ -1,12 +1,10 @@
-using NedoSilpo.Common.Events;
+using Cqrs.Core.Events;
 
 namespace NedoSilpo.Common.Handlers;
 
-// todo make it generic, and use accordingly
-public interface IEventHandler
+public interface IEventHandler;
+
+public interface IEventHandler<in T> : IEventHandler where T : BaseEvent
 {
-    Task On(ProductCreated @event);
-    Task On(ProductUpdated @event);
-    Task On(ProductSold @event);
-    Task On(ProductRemoved @event);
+    Task On(T @event);
 }
