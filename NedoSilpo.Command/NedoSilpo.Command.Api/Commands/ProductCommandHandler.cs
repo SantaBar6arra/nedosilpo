@@ -4,10 +4,18 @@ using NedoSilpo.Command.Domain.Aggregates;
 
 namespace NedoSilpo.Command.Api.Commands;
 
-public class CommandHandler : ICommandHandler
+public interface IProductCommandHandler
+{
+    Task HandleAsync(CreateProduct command);
+    Task HandleAsync(UpdateProduct command);
+    Task HandleAsync(SellProduct command);
+    Task HandleAsync(RemoveProduct command);
+}
+
+public class ProductCommandHandler : IProductCommandHandler
 {
     private readonly IEventSourcingHandler<ProductAggregate> _eventSourcingHandler;
-    public CommandHandler(IEventSourcingHandler<ProductAggregate> eventSourcingHandler) =>
+    public ProductCommandHandler(IEventSourcingHandler<ProductAggregate> eventSourcingHandler) =>
         _eventSourcingHandler = eventSourcingHandler;
 
     public Task HandleAsync(CreateProduct command)

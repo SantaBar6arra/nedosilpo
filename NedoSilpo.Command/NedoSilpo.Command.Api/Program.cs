@@ -1,29 +1,21 @@
 using Confluent.Kafka;
 using Cqrs.Core.Domain;
-using Cqrs.Core.Events;
 using Cqrs.Core.Handlers;
 using Cqrs.Core.Infrastructure;
 using Cqrs.Core.Producers;
-using MongoDB.Bson.Serialization;
 using NedoSilpo.Command.Api;
 using NedoSilpo.Command.Api.Commands;
+using NedoSilpo.Command.Api.Helpers;
 using NedoSilpo.Command.Domain.Aggregates;
 using NedoSilpo.Command.Infrastructure.Config;
-using NedoSilpo.Command.Infrastructure.Dispatchers;
 using NedoSilpo.Command.Infrastructure.Handlers;
 using NedoSilpo.Command.Infrastructure.Producers;
 using NedoSilpo.Command.Infrastructure.Repositories;
 using NedoSilpo.Command.Infrastructure.Stores;
-using NedoSilpo.Common.Events;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// todo replace this obvious shit
-BsonClassMap.RegisterClassMap<BaseEvent>();
-BsonClassMap.RegisterClassMap<ProductCreated>();
-BsonClassMap.RegisterClassMap<ProductUpdated>();
-BsonClassMap.RegisterClassMap<ProductSold>();
-BsonClassMap.RegisterClassMap<ProductRemoved>();
+StartupHelper.RegisterBsonClassMap();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -32,17 +24,13 @@ builder.Services.Configure<ProducerConfig>(builder.Configuration.GetSection(name
 builder.Services.AddScoped<IEventStoreRepository, EventStoreRepository>();
 builder.Services.AddScoped<IEventProducer, EventProducer>();
 builder.Services.AddScoped<IEventStore, EventStore>();
-builder.Services.AddScoped<IEventSourcingHandler<ProductAggregate>, EventSourcingHandler>();
-builder.Services.AddScoped<ICommandHandler, CommandHandler>();
+builder.Services.AddScoped<IEventSourcingHandler<ProductAggregate>, ProductSourcingHandler>();
+builder.Services.AddScoped<IEventSourcingHandler<ClientAggregate>, ClientSourcingHandler>();
+builder.Services.AddScoped<IProductCommandHandler, ProductCommandHandler>();
+builder.Services.AddScoped<IClientCommandHandler, ClientCommandHandler>();
 
 // registering a command handlers
-var commandHandler = builder.Services.BuildServiceProvider().GetRequiredService<ICommandHandler>();
-var dispatcher = new CommandDispatcher();
-dispatcher.Register<CreateProduct>(commandHandler.HandleAsync);
-dispatcher.Register<UpdateProduct>(commandHandler.HandleAsync);
-dispatcher.Register<SellProduct>(commandHandler.HandleAsync);
-dispatcher.Register<RemoveProduct>(commandHandler.HandleAsync);
-builder.Services.AddSingleton<ICommandDispatcher>(_ => dispatcher);
+builder.RegisterCommandHandlers();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

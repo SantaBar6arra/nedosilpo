@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using Confluent.Kafka;
 using Cqrs.Core.Consumers;
@@ -49,8 +48,8 @@ public class EventConsumer : IEventConsumer
     private async Task HandleEvent(BaseEvent @event)
     {
         var handlers = _eventHandlers
-            .Select(handler => (handler, handler.GetType().GetMethod("On", [@event.GetType()])))
-            .OfType<(IEventHandler, MethodInfo)>()
+            .Select(handler => (handler, on: handler.GetType().GetMethod("On", [@event.GetType()])))
+            .Where(handlerAndOnMethod => handlerAndOnMethod.on is not null)
             .ToArray();
 
         if (handlers.Length is 0)

@@ -17,6 +17,7 @@ builder.Services.Configure<ConsumerConfig>(builder.Configuration.GetSection(name
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.RegisterEventHandlers(Assembly.GetAssembly(typeof(ConsumerHostedService))!); // todo find better way
 builder.Services.AddScoped<IEventConsumer, EventConsumer>();
 builder.Services.AddHostedService<ConsumerHostedService>();

@@ -30,6 +30,9 @@ public class EventJsonConverter : JsonConverter<BaseEvent>
             nameof(ProductUpdated) => JsonSerializer.Deserialize<ProductUpdated>(json, options),
             nameof(ProductSold) => JsonSerializer.Deserialize<ProductSold>(json, options),
             nameof(ProductRemoved) => JsonSerializer.Deserialize<ProductRemoved>(json, options),
+            nameof(ClientRegistered) => JsonSerializer.Deserialize<ClientRegistered>(json, options),
+            nameof(ClientUpdated) => JsonSerializer.Deserialize<ClientUpdated>(json, options),
+            nameof(ClientDeactivated) => JsonSerializer.Deserialize<ClientDeactivated>(json, options),
             _ => throw new JsonException($"{typeDiscriminator} is not supported yet!")
         };
     }

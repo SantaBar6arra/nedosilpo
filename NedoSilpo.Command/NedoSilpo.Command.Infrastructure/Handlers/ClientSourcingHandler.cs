@@ -6,16 +6,16 @@ using NedoSilpo.Command.Domain.Aggregates;
 
 namespace NedoSilpo.Command.Infrastructure.Handlers;
 
-public class EventSourcingHandler : IEventSourcingHandler<ProductAggregate> // todo specify name
+public class ClientSourcingHandler : IEventSourcingHandler<ClientAggregate>
 {
     private readonly IEventStore _eventStore;
 
-    public EventSourcingHandler(IEventStore eventStore) => _eventStore = eventStore;
+    public ClientSourcingHandler(IEventStore eventStore) => _eventStore = eventStore;
 
-    public async Task<ProductAggregate> GetByIdAsync(Guid aggregateId)
+    public async Task<ClientAggregate> GetByIdAsync(Guid aggregateId)
     {
-        var aggregate = new ProductAggregate();
-        var events = await _eventStore.GetEventsAsync(aggregateId, typeof(ProductAggregate));
+        var aggregate = new ClientAggregate();
+        var events = await _eventStore.GetEventsAsync(aggregateId, typeof(ClientAggregate));
 
         if (events is null or { Count: 0 })
             return aggregate;
