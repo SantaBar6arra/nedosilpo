@@ -4,21 +4,15 @@
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <UserSecretsId>4156f997-e8cb-49d1-b741-9d219823cb02</UserSecretsId>
+    <UserSecretsId>67bd595f-56fe-4608-bbb0-e8b3fcd9f540</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Cqrs-Es\Cqrs.Core\Cqrs.Core.csproj" />
-    <ProjectReference Include="..\..\NedoSilpo.Common\NedoSilpo.Common.csproj" />
     <ProjectReference Include="..\NedoSilpo.Query.Domain\NedoSilpo.Query.Domain.csproj" />
     <ProjectReference Include="..\NedoSilpo.Query.Infrastructure\NedoSilpo.Query.Infrastructure.csproj" />
   </ItemGroup>

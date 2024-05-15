@@ -17,7 +17,7 @@ public class ConsumerHostedService : IHostedService
         _logger = logger;
     }
 
-    public async Task StartAsync(CancellationToken cancellationToken)
+    public Task StartAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Starting consumer hosted service");
 
@@ -26,7 +26,8 @@ public class ConsumerHostedService : IHostedService
         var topic = Environment.GetEnvironmentVariable("KAFKA_TOPIC")
             ?? throw new Exception("Could not find KAFKA_TOPIC environment variable");
 
-        await Task.Run(() => eventConsumer.Consume(topic), cancellationToken);
+        Task.Run(() => eventConsumer.Consume(topic), cancellationToken);
+        return Task.CompletedTask;
     }
 
     public Task StopAsync(CancellationToken cancellationToken)

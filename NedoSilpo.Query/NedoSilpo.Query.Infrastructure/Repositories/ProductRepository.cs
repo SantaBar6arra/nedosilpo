@@ -39,8 +39,22 @@ public class ProductRepository : IProductRepository
         return await _dataContext.Products.FindAsync(id) ?? throw new Exception("entity not found");
     }
 
-    public async Task<IEnumerable<Product>> GetAllAsync()
+    public async Task<IEnumerable<Product>> GetAllAsync(string name, string description, decimal priceMin, decimal priceMax)
     {
-        return await _dataContext.Products.AsNoTracking().ToListAsync();
+        return await _dataContext.Products
+            .AsNoTracking()
+            .Where(product => product.Name.Contains(name)
+                              && product.Description.Contains(description)
+                              && product.Price >= priceMin
+                              && product.Price <= priceMax)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Product>> GetDeletedAsync()
+    {
+        return await _dataContext.Products
+            .AsNoTracking()
+            .Where(product => product.IsDeleted)
+            .ToListAsync();
     }
 }

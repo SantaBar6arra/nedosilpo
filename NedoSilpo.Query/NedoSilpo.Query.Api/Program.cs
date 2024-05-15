@@ -2,7 +2,6 @@ using System.Reflection;
 using Confluent.Kafka;
 using Cqrs.Core.Consumers;
 using Microsoft.EntityFrameworkCore;
-using NedoSilpo.Query.Api;
 using NedoSilpo.Query.Api.Extensions;
 using NedoSilpo.Query.Domain.Repositories;
 using NedoSilpo.Query.Infrastructure.Consumers;
@@ -11,8 +10,6 @@ using NedoSilpo.Query.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.Configure<ConsumerConfig>(builder.Configuration.GetSection(nameof(ConsumerConfig)));
 builder.Services.AddDbContext<DataContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("SqlServer")));
@@ -20,9 +17,14 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IClientRepository, ClientRepository>();
 builder.Services.RegisterEventHandlers(Assembly.GetAssembly(typeof(ConsumerHostedService))!); // todo find better way
 builder.Services.AddScoped<IEventConsumer, EventConsumer>();
-builder.Services.AddHostedService<ConsumerHostedService>();
+
+// Add services to the container.
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddHostedService<ConsumerHostedService>();
+
 
 var dataContext = builder.Services.BuildServiceProvider().GetRequiredService<DataContext>();
 dataContext.Database.EnsureCreated();
@@ -36,6 +38,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.MapControllers();
 app.UseHttpsRedirection();
 
 var summaries = new[]
@@ -60,10 +63,7 @@ app.MapGet("/weatherforecast", () =>
 
 app.Run();
 
-namespace NedoSilpo.Query.Api
+record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
-    record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-    {
-        public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-    }
+    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
 }

@@ -9,5 +9,6 @@ public interface IProductRepository
     Task RemoveAsync(Guid id);
 
     Task<Product> GetByIdAsync(Guid id);
-    Task<IEnumerable<Product>> GetAllAsync();
+    Task<IEnumerable<Product>> GetAllAsync(string name, string description, decimal priceMin, decimal priceMax);
+    Task<IEnumerable<Product>> GetDeletedAsync();
 }
