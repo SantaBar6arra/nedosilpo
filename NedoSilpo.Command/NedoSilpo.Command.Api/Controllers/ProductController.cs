@@ -59,4 +59,44 @@ public class ProductController
             return new ObjectResult("Internal server error") { StatusCode = StatusCodes.Status500InternalServerError };
         }
     }
+
+    [HttpPost("sell")]
+    public async Task<ActionResult> Sell(SellProductRequest request)
+    {
+        try
+        {
+            var (id, quantity) = request;
+            var command = new SellProduct(id, quantity);
+            await _dispatcher.SendAsync(command);
+            return new StatusCodeResult(StatusCodes.Status200OK);
+        }
+        catch (InvalidOperationException exception)
+        {
+            _logger.LogError(exception.Message);
+            return new ObjectResult(new { exception.Message }) { StatusCode = StatusCodes.Status400BadRequest };
+        }
+        catch (Exception)
+        {
+            return new ObjectResult("Internal server error") { StatusCode = StatusCodes.Status500InternalServerError };
+        }
+    }
+
+    [HttpDelete]
+    public async Task<ActionResult> Sell(RemoveProductRequest request)
+    {
+        try
+        {
+            await _dispatcher.SendAsync(new RemoveProduct(request.Id));
+            return new StatusCodeResult(StatusCodes.Status200OK);
+        }
+        catch (InvalidOperationException exception)
+        {
+            _logger.LogError(exception.Message);
+            return new ObjectResult(new { exception.Message }) { StatusCode = StatusCodes.Status400BadRequest };
+        }
+        catch (Exception)
+        {
+            return new ObjectResult("Internal server error") { StatusCode = StatusCodes.Status500InternalServerError };
+        }
+    }
 }

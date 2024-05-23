@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace NedoSilpo.Query.Infrastructure.Consumers;
 
-public class ConsumerHostedService : IHostedService
+public class ConsumerHostedService : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<ConsumerHostedService> _logger;
@@ -17,20 +17,19 @@ public class ConsumerHostedService : IHostedService
         _logger = logger;
     }
 
-    public Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("Starting consumer hosted service");
+        _logger.LogInformation("Starting consumer hosted background service");
 
         using var scope = _serviceProvider.CreateScope();
         var eventConsumer = scope.ServiceProvider.GetRequiredService<IEventConsumer>();
         var topic = Environment.GetEnvironmentVariable("KAFKA_TOPIC")
-            ?? throw new Exception("Could not find KAFKA_TOPIC environment variable");
+                    ?? throw new Exception("Could not find KAFKA_TOPIC environment variable");
 
-        Task.Run(() => eventConsumer.Consume(topic), cancellationToken);
-        return Task.CompletedTask;
+        await Task.Run(() => eventConsumer.Consume(topic), stoppingToken);
     }
 
-    public Task StopAsync(CancellationToken cancellationToken)
+    public override Task StopAsync(CancellationToken cancellationToken)
     {
         _logger.LogInformation("Stopping consumer hosted service");
         return Task.CompletedTask;
